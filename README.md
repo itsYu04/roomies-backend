@@ -3,7 +3,7 @@
 ## Description
 ## Installation
 ```bash
-git clone 
+git clone https://github.com/itsYu04/roomies-backend.git
 ```
 ```bash
 npm install

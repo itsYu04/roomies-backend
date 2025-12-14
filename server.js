@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import userRoutes from "./src/routes/users.js";
-// import homeRoutes from "./src/routes/homes.js";
+import houseRoutes from "./src/routes/house.js";
 // import budgetRoutes from "./src/routes/budgets.js";
 
 dotenv.config({ quiet: true }) // { quiet: true } suppress all logs from dotenv
@@ -20,7 +20,7 @@ app.get("/", (req, res) =>
 
 // Routes
 app.use("/api/users", userRoutes);
-// app.use("/api/homes", homeRoutes);
+app.use("/api/house", houseRoutes);
 // app.use("/api/budget", budgetRoutes);
 //app.use("/api/tasks", tasksRoutes);
 //app.use("/api/polls", pollsRoutes);

@@ -12,9 +12,7 @@ export async function getAllUsers(req, res) {
 export async function createUser(req, res) {
   try {
     const { user_id, username, avatar_url } = req.body;
-    console.log("Params is",user_id)
-    console.log("Body is ",req.body)
-    console.log("Username is ", username)
+    console.log(`Creating user with username: ${username}`)
     const newUser = await insertUser(user_id, username, avatar_url);
     res.status(201).json(newUser);
   } catch (error) {

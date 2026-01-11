@@ -1,4 +1,4 @@
-import { fetchHouseById, fetchUserHouses, fetchHouses, insertHouse, insertHouseUserRelation } from "../models/houseModel.js"
+import { fetchHouseById, fetchUserHouses, fetchHouses, insertHouse, insertHouseUserRelation, deleteHouse, deleteHouseUserRelation, fetchHouseMembers } from "../models/houseModel.js"
 
 export async function getHouseById(req, res) {
     try{
@@ -32,6 +32,16 @@ export async function getHousesByUserId(req, res) {
     }
 }
 
+export async function getHouseMembers(req,res) {
+    try{
+        const house_id = req.params.house_id;
+        const house_members = await fetchHouseMembers(house_id);
+        res.status(200).json(house_members);
+    }catch(e){
+        res.status(500).json({ error: e.message });
+    }
+}
+
 export async function createHouse(req, res) {
     try{
         const { name, address, user_id} = req.body;
@@ -52,6 +62,27 @@ export async function addRoommate(req, res) {
         const { user_id, role, stared } = req.body;
         await insertHouseUserRelation(user_id, house_id, role, stared);
         res.status(200).json({ message: `User with ID ${user_id} added successfully.` });
+    }catch(e){
+        res.status(500).json({ error: e.message });
+    }
+}
+
+export async function deleteRoommate(req, res) {
+    try{
+        const house_id = req.params.house_id;
+        const user_id = req.params.user_id;
+        await deleteHouseUserRelation(house_id, user_id);
+        res.status(200).json({ message: `User with ID ${user_id} deleted successfully.` });
+    }catch(e){
+        res.status(500).json({ error: e.message });
+    }
+}
+
+export async function deleteHouseById(req, res) {
+    try{
+        const house_id = req.params.house_id;
+        await deleteHouse(house_id);
+        res.status(200).json({ message: `House with ID ${house_id} deleted successfully.` });
     }catch(e){
         res.status(500).json({ error: e.message });
     }

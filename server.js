@@ -18,6 +18,13 @@ app.get("/", (req, res) =>
   res.json({ info: "Welcome to roomies" })
 );
 
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`${timestamp} ${req.method} ${req.originalUrl} body: ${req.body}`);
+  console.log(req.body);
+  next();
+});
+
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/house", houseRoutes);

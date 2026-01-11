@@ -9,6 +9,15 @@ export async function fetchUserHouses(user_id) {
     return data;
 }
 
+export async function fetchHouseMembers(house_id) {
+    const {data, error} = await supabase
+    .from("user_house")
+    .select("user_profile(*)")
+    .eq("house_id", house_id);
+    if (error) throw new Error(error.message);
+    return (data || []).map(row => row.user_profile);
+}
+
 export async function fetchHouses(house_ids) {
     const {data, error} = await supabase
     .from("house")
@@ -43,4 +52,21 @@ export async function insertHouseUserRelation(user_id, house_id, role='member', 
     .select();
     if (error) throw new Error(error.message);
     return data[0];
+}
+
+export async function deleteHouseUserRelation(house_id, user_id) {
+    const {error} = await supabase
+    .from("user_house")
+    .delete()
+    .eq("house_id", house_id)
+    .eq("user_id", user_id)
+    if (error) throw new Error(error.message);
+}
+
+export async function deleteHouse(house_id) {
+    const {error} = await supabase
+    .from("house")
+    .delete()
+    .eq("id", house_id);
+    if (error) throw new Error(error.message);
 }

@@ -45,10 +45,10 @@ export async function insertHouse(name, address, user_id){
     return data[0];
 }
 
-export async function insertHouseUserRelation(user_id, house_id, role='member', stared=false){
+export async function insertHouseUserRelation(user_id, house_id, role='member'){
     const { data, error } = await supabase
     .from("user_house")
-    .insert([{ user_id, house_id, role, stared}])
+    .insert([{ user_id, house_id, role}])
     .select();
     if (error) throw new Error(error.message);
     return data[0];

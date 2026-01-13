@@ -1,4 +1,5 @@
 import { fetchHouseById, fetchUserHouses, fetchHouses, insertHouse, insertHouseUserRelation, deleteHouse, deleteHouseUserRelation, fetchHouseMembers } from "../models/houseModel.js"
+import { fetchUserProfileByEmail } from "../models/userModel.js";
 
 export async function getHouseById(req, res) {
     try{
@@ -44,12 +45,11 @@ export async function getHouseMembers(req,res) {
 
 export async function createHouse(req, res) {
     try{
-        const { name, address, user_id} = req.body;
+        const { name, address, user_id } = req.body;
         const house = await insertHouse(name, address, user_id);
         const house_id = house.id
         const role = "owner";
-        const stared = false;
-        await insertHouseUserRelation(user_id, house_id, role, stared);
+        await insertHouseUserRelation(user_id, house_id, role);
         res.status(200).json(house);
     }catch(e){
         res.status(500).json({ error: e.message });
@@ -59,9 +59,14 @@ export async function createHouse(req, res) {
 export async function addRoommate(req, res) {
     try{
         const house_id = req.params.house_id;
-        const { user_id, role, stared } = req.body;
-        await insertHouseUserRelation(user_id, house_id, role, stared);
-        res.status(200).json({ message: `User with ID ${user_id} added successfully.` });
+        const { email } = req.body;
+        const role = "member";
+        const user = await fetchUserProfileByEmail(email);
+        if (user) {
+            console.log(user.id);
+            await insertHouseUserRelation(user.id, house_id, role);
+            res.status(200).json({ message: `User with ID ${user.id} added successfully.`});
+        }
     }catch(e){
         res.status(500).json({ error: e.message });
     }

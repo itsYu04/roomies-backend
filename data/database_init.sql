@@ -20,7 +20,6 @@ create table user_house(
     user_id uuid references user_profile(id) on delete cascade,
     house_id uuid references house(id) on delete cascade,
     role text default 'member',
-    stared boolean default false,
     primary key (user_id, house_id)
 );
 

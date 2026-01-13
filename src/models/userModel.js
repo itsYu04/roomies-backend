@@ -9,25 +9,39 @@ export async function fetchAllUsers() {
 export async function insertUser(id, username, avatar_url) {
   const { data, error } = await supabase
     .from("user_profile")
-    .insert([{ id, username, avatar_url }])
+    .insert([{ id, username, email, avatar_url }])
     .select();
   if (error) throw new Error(error.message);
   return data[0];
 }
 
+export async function fetchUserProfileByEmail(email) {
+  const { data: profile, error: profileError } = await supabase
+    .from("user_profile")
+    .select()
+    .eq("email", email)
+    .maybeSingle();
+  if (profileError) throw new Error(profileError.message);
+  return profile;
+}
+
 export async function selectUserById(user_id) {
-  const { data: profileData, error } = await supabase.from("user_profile").select("*");
+  const { data: profileData, error } = await supabase
+  .from("user_profile")
+  .select()
+  .eq("id", user_id)
+  .maybeSingle();
   
-  console.log("Profile Data:", profileData);
+  // console.log("Profile Data:", profileData);
 
   const { data: authData, error: authError } = await supabase.auth.admin.getUserById(user_id);
 
-  console.log("Auth Data:", authData);
+  // console.log("Auth Data:", authData);
 
   if (error) throw new Error(error.message);
   if(authError) throw new Error(authError.message);
   return {
-    ...profileData[0],
+    ...profileData,
     email: authData.user.email,
   };
 }

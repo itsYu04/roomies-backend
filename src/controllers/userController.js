@@ -14,6 +14,7 @@ export async function getUserById(req, res){
     const user_id = req.params.user_id;
     console.log(user_id)
     const user = await selectUserById(user_id)
+    console.log('User', user);
     res.status(201).json(user);
   }catch(e){
     res.status(500).json({ error: e.message });
@@ -22,9 +23,9 @@ export async function getUserById(req, res){
 
 export async function createUser(req, res) {
   try {
-    const { user_id, username, avatar_url } = req.body;
+    const { user_id, username, email, avatar_url } = req.body;
     console.log(`Creating user with username: ${username}`)
-    const newUser = await insertUser(user_id, username, avatar_url);
+    const newUser = await insertUser(user_id, username, email, avatar_url);
     res.status(201).json(newUser);
   } catch (e) {
     res.status(500).json({ error: e.message });

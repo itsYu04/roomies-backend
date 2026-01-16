@@ -27,19 +27,20 @@ export async function fetchUserProfileByEmail(email) {
 
 export async function selectUserById(user_id) {
   const { data: profileData, error } = await supabase
-  .from("user_profile")
-  .select()
-  .eq("id", user_id)
-  .maybeSingle();
-  
+    .from("user_profile")
+    .select()
+    .eq("id", user_id)
+    .maybeSingle();
+
   // console.log("Profile Data:", profileData);
 
-  const { data: authData, error: authError } = await supabase.auth.admin.getUserById(user_id);
+  const { data: authData, error: authError } =
+    await supabase.auth.admin.getUserById(user_id);
 
   // console.log("Auth Data:", authData);
 
   if (error) throw new Error(error.message);
-  if(authError) throw new Error(authError.message);
+  if (authError) throw new Error(authError.message);
   return {
     ...profileData,
     email: authData.user.email,
@@ -56,7 +57,7 @@ export async function updateUser(id, username, avatar_url) {
   const { error } = await supabase
     .from("user_profile")
     .update(updatePayload)
-    .eq("id", id)
+    .eq("id", id);
   if (error) throw new Error(error.message);
 }
 

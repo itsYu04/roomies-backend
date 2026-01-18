@@ -7,6 +7,7 @@ import {
   deleteHouseById,
   deleteRoommate,
   getHouseMembers,
+  updateHouseData,
 } from "../controllers/houseController.js";
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.get("/user/:id", getHousesByUserId);
 router.get("/:house_id/roommates", getHouseMembers);
 router.post("/", createHouse);
 router.post("/:house_id/roommate", addRoommate);
+router.put("/:id", updateHouseData);
 router.delete("/:house_id/:user_id", deleteRoommate);
 router.delete("/:house_id", deleteHouseById);
 

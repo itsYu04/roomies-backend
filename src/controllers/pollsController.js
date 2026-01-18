@@ -106,8 +106,8 @@ export async function deletePollById(req, res) {
 // Comments
 export async function addNewComment(req, res) {
   try {
-    const { poll_id, created_by, created_at, comment_text } = req.body;
-    await insertComment(poll_id, created_by, created_at, comment_text);
+    const { poll_id, created_by, comment_text } = req.body;
+    await insertComment(poll_id, created_by, comment_text);
     res.status(200).json("Comment added successfully");
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -118,6 +118,7 @@ export async function getCommentsByPoll(req, res) {
   try {
     const poll_id = req.params.poll_id;
     const comments = await fetchCommentsByPoll(poll_id);
+    console.log("Comments are:", comments);
     await res.status(200).json(comments);
   } catch (e) {
     res.status(500).json({ error: e.message });

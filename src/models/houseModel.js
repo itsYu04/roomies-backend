@@ -31,7 +31,8 @@ export async function fetchHouseById(house_id) {
   const { data, error } = await supabase
     .from("house")
     .select()
-    .eq("id", house_id);
+    .eq("id", house_id)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return data;
 }
@@ -56,6 +57,20 @@ export async function insertHouseUserRelation(
     .select();
   if (error) throw new Error(error.message);
   return data[0];
+}
+
+export async function updateHouse(house_id, name, address) {
+  const updatePayload = {};
+  if (name !== undefined) updatePayload.name = name;
+  if (address !== undefined) updatePayload.address = address;
+  if (Object.keys(updatePayload).length === 0) {
+    throw new Error("No fields provided to update");
+  }
+  const { error } = await supabase
+    .from("house")
+    .update(updatePayload)
+    .eq("id", house_id);
+  if (error) throw new Error(error.message);
 }
 
 export async function deleteHouseUserRelation(house_id, user_id) {

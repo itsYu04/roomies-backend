@@ -61,6 +61,22 @@ export async function updateUser(id, username, avatar_url) {
   if (error) throw new Error(error.message);
 }
 
+export async function uploadUserProfileImage(user_id, avatar_url) {
+  const updatePayload = {};
+  if (avatar_url !== undefined) updatePayload.avatar_url = avatar_url;
+  if (Object.keys(updatePayload).length === 0) {
+    throw new Error("No fields provided to update");
+  }
+  const { data, error } = await supabase
+    .from("user_profile")
+    .update(updatePayload)
+    .eq("id", user_id)
+    .select()
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function deleteAuthUser(userId) {
   const { error } = await supabase.auth.admin.deleteUser(userId);
   if (error) throw new Error(error.message);

@@ -7,6 +7,7 @@ import {
   deleteHouse,
   deleteHouseUserRelation,
   fetchHouseMembers,
+  updateHouse,
 } from "../models/houseModel.js";
 import { fetchUserProfileByEmail } from "../models/userModel.js";
 
@@ -60,6 +61,18 @@ export async function createHouse(req, res) {
     const role = "owner";
     await insertHouseUserRelation(user_id, house_id, role);
     res.status(200).json(house);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function updateHouseData(req, res) {
+  try {
+    const house_id = req.params.id;
+    const { name, address } = req.body;
+    console.log(`Updating house with id: ${house_id}`);
+    const updatedHouse = await updateHouse(house_id, name, address);
+    res.status(200).json(updatedHouse);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

@@ -4,6 +4,7 @@ import {
   deleteAuthUser,
   updateUser,
   selectUserById,
+  uploadUserProfileImage
 } from "../models/userModel.js";
 
 export async function getAllUsers(req, res) {
@@ -46,6 +47,17 @@ export async function updateUserData(req, res) {
     const updatedUser = await updateUser(user_id, username, avatar_url);
     res.status(200).json(updatedUser);
   } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function uploadProfilePic(req, res) {
+  try{
+    const user_id = req.params.user_id;
+    const { avatar_url } = req.body;
+    const updatedUser = uploadUserProfileImage(user_id, avatar_url);
+    res.status(200).json(updatedUser);
+  }catch(e){
     res.status(500).json({ error: e.message });
   }
 }

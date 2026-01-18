@@ -5,6 +5,7 @@ import {
   updateUserData,
   deleteUser,
   getUserById,
+  uploadProfilePic,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ router.get("/", getAllUsers);
 router.post("/", createUser);
 router.get("/:user_id", getUserById);
 router.put("/:user_id", updateUserData);
+router.put("/profile_pic", uploadProfilePic)//TODO: Review this
 router.delete("/:id", deleteUser);
 
 export default router;

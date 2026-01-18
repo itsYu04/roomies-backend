@@ -5,8 +5,9 @@ import {
   getTaskById,
   getTasksByHouse,
   getTasksByUser,
+  markTaskAsDone,
   updateTaskData,
-} from "../controllers/taskController";
+} from "../controllers/taskController.js";
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.get("/house/:house_id", getTasksByHouse);
 router.get("/user/:user_id", getTasksByUser);
 router.post("/", createNewTask);
 router.put("/:task_id", updateTaskData);
+router.put("/done/:task_id", markTaskAsDone);
 router.delete("/:task_id", deleteTaskById);
 
 export default router;

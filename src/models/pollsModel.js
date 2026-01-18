@@ -43,13 +43,40 @@ export async function fetchMyPollsByHouse(house_id, user_id) {
   const today = new Date().toISOString().split("T")[0];
   const { data, error } = await supabase
     .from("polls")
-    .select()
+    .select("*, poll_options(*)")
     .eq("house_id", house_id)
     .eq("created_by", user_id)
     .eq("is_closed", false)
     .gt("expires_at", today);
   if (error) throw new Error(error.message);
-  return data;
+
+  const normalized = (data || []).map((p) => ({
+    ...p,
+    options: p.poll_options ?? [],
+  }));
+
+  const creatorIds = [...new Set(normalized.map((p) => p.created_by))].filter(
+    Boolean
+  );
+  if (creatorIds.length === 0) return normalized;
+
+  const { data: creators, error: creatorsError } = await supabase
+    .from("user_profile")
+    .select("id, username")
+    .in("id", creatorIds);
+
+  if (creatorsError) throw new Error(creatorsError.message);
+
+  const creatorsById = Object.fromEntries(
+    (creators || []).map((c) => [c.id, c.username])
+  );
+
+  const withUsernames = normalized.map((p) => ({
+    ...p,
+    created_by_username: creatorsById[p.created_by] ?? null,
+  }));
+
+  return withUsernames;
 }
 
 export async function fetchMyHistoricPollsByHouse(house_id, user_id) {
@@ -77,14 +104,40 @@ export async function fetchMyPendingPollsByHouse(house_id, user_id) {
   const { data: votes, error: votesError } = await supabase
     .from("poll_votes")
     .select("poll_id")
-    .eq("user_id", user_id);
+    .eq("voter_id", user_id);
 
   if (votesError) throw new Error(votesError.message);
 
   const votedPollIds = votes.map((v) => v.poll_id);
   const pendingPolls = polls.filter((p) => !votedPollIds.includes(p.id));
 
-  return pendingPolls;
+  const creatorIds = [...new Set(pendingPolls.map((p) => p.created_by))].filter(
+    Boolean
+  );
+  if (creatorIds.length === 0) return pendingPolls;
+
+  console.log("creatorIds", creatorIds);
+
+  const { data: creators, error: creatorsError } = await supabase
+    .from("user_profile")
+    .select("id, username")
+    .in("id", creatorIds);
+
+  if (creatorsError) throw new Error(creatorsError.message);
+
+  console.log("creators", creators);
+  const creatorsById = Object.fromEntries(
+    creators.map((c) => [c.id, c.username])
+  );
+
+  const pendingPollsWithUsernames = pendingPolls.map((p) => ({
+    ...p,
+    created_by_username: creatorsById[p.created_by] ?? null,
+  }));
+
+  console.log("pendingPollsWithUsernames", pendingPollsWithUsernames);
+
+  return pendingPollsWithUsernames;
 }
 
 export async function fetchPollById(poll_id) {
@@ -101,15 +154,10 @@ export async function deletePoll(poll_id) {
   if (error) throw new Error(error.message);
 }
 
-export async function insertComment(
-  poll_id,
-  created_by,
-  created_at,
-  comment_text
-) {
+export async function insertComment(poll_id, created_by, comment_text) {
   const { data, error } = await supabase
     .from("poll_comments")
-    .insert([{ poll_id, created_by, created_at, comment_text }])
+    .insert([{ poll_id, created_by, comment_text }])
     .select();
   if (error) throw new Error(error.message);
   return data;
@@ -118,10 +166,17 @@ export async function insertComment(
 export async function fetchCommentsByPoll(poll_id) {
   const { data, error } = await supabase
     .from("poll_comments")
-    .select()
+    .select("*, user_profile(id, username)")
     .eq("poll_id", poll_id);
   if (error) throw new Error(error.message);
-  return data;
+  console.log("Data is: ", data);
+  return (data || []).map((c) => {
+    const { user_profile, ...rest } = c;
+    const username = Array.isArray(user_profile)
+      ? user_profile[0]?.username ?? null
+      : user_profile?.username ?? null;
+    return { ...rest, username };
+  });
 }
 
 export async function deleteComment(comment_id) {

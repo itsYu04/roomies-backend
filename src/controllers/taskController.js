@@ -4,8 +4,9 @@ import {
   fetchHouseTasks,
   fetchHouseTasksByUser,
   insertHouseTask,
+  setTaskAsComplete,
   updateTask,
-} from "../models/taskModel";
+} from "../models/taskModel.js";
 
 export async function getTasksByHouse(req, res) {
   try {
@@ -40,14 +41,24 @@ export async function getTaskById(req, res) {
 
 export async function createNewTask(req, res) {
   try {
-    const { house_id, title, description, assigned_to, due_date, is_done } =
-      req.body;
+    const {
+      house_id,
+      title,
+      description,
+      assigned_to,
+      rotation,
+      task_type,
+      due_date,
+    } = req.body;
+    const is_done = false;
     const task = await insertHouseTask(
       house_id,
       title,
       description,
       assigned_to,
       due_date,
+      rotation,
+      task_type,
       is_done
     );
     if (task) {
@@ -64,7 +75,7 @@ export async function createNewTask(req, res) {
 export async function updateTaskData(req, res) {
   try {
     const task_id = req.params.task_id;
-    const { house_id, title, description, assigned_to, due_date, is_done } =
+    const { house_id, title, description, assigned_to, due_date, rotation, is_done } =
       req.body;
     console.log(`Updating task with id: ${task_id}`);
     const updatedTask = await updateTask(
@@ -74,8 +85,21 @@ export async function updateTaskData(req, res) {
       description,
       assigned_to,
       due_date,
+      rotation,
       is_done
     );
+    res.status(200).json(updatedTask);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function markTaskAsDone(req, res) {
+  try {
+    const task_id = req.params.task_id;
+    const { task_image_url } = req.body;
+    console.log(`Marking task with id: ${task_id} as complete`);
+    const updatedTask = await setTaskAsComplete(task_id, task_image_url);
     res.status(200).json(updatedTask);
   } catch (e) {
     res.status(500).json({ error: e.message });

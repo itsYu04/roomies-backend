@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addNewComment,
+  addVote,
   createPoll,
   deleteCommentById,
   deletePollById,
@@ -21,6 +22,7 @@ router.get("/user/:house_id/:user_id", getMyPollsByHouse);
 router.get("/user_pending/:house_id/:user_id", getMyPendingPollsByHouse);
 router.get("/user_historic/:house_id/:user_id", getMyHistoricPollsByHouse);
 router.post("/", createPoll);
+router.post("/addVote/:poll_option_id", addVote);
 router.delete("/:id", deletePollById);
 
 // Comments

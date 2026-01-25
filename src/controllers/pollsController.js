@@ -9,13 +9,22 @@ import {
   fetchPollsByHouse,
   insertComment,
   insertPoll,
+  insertPollOption,
+  insertVote,
 } from "../models/pollsModel.js";
 
 //Polls
 export async function createPoll(req, res) {
   try {
-    const { house_id, title, description, created_by, expires_at, type } =
-      req.body;
+    const {
+      house_id,
+      title,
+      description,
+      created_by,
+      expires_at,
+      type,
+      options,
+    } = req.body;
     const is_closed = false;
     const poll = await insertPoll(
       house_id,
@@ -26,7 +35,20 @@ export async function createPoll(req, res) {
       is_closed,
       type
     );
-    res.status(200).json(poll);
+    // Add the poll options
+    console.log("The inserted poll is:",poll);
+    const createdPoll = Array.isArray(poll) ? poll[0] : poll;
+    console.log("Options are: ", options);
+
+    let insertedOptions = [];
+    if (Array.isArray(options) && options.length > 0) {
+      const inserted = await Promise.all(
+        options.map((opt) => insertPollOption(createdPoll.id, opt))
+      );
+      insertedOptions = inserted.flatMap((r) => r || []);
+    }
+
+    res.status(200).json({ ...createdPoll, options: insertedOptions });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -98,6 +120,21 @@ export async function deletePollById(req, res) {
     await res
       .status(200)
       .json({ message: `Poll with ID ${poll_id} deleted successfully.` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function addVote(req, res) {
+  try {
+    const poll_option_id = req.params.poll_option_id;
+    const { voter_id, poll_id } = req.body;
+    await insertVote(poll_option_id, voter_id, poll_id);
+    await res
+      .status(200)
+      .json({
+        message: `Vote to poll with id: ${poll_id} submitted successfully.`,
+      });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

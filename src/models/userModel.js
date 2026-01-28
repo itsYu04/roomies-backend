@@ -81,3 +81,16 @@ export async function deleteAuthUser(userId) {
   const { error } = await supabase.auth.admin.deleteUser(userId);
   if (error) throw new Error(error.message);
 }
+
+export async function updateDefaultHouse(user_id, house_id) {
+  const updatePayload = {};
+  if (house_id !== undefined) updatePayload.def_house = house_id;
+  if (Object.keys(updatePayload).length === 0) {
+    throw new Error("No fields provided to update");
+  }
+  const { error } = await supabase
+    .from("user_profile")
+    .update(updatePayload)
+    .eq("id", user_id);
+  if (error) throw new Error(error.message);
+}

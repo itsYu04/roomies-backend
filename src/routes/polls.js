@@ -10,20 +10,22 @@ import {
   getMyPendingPollsByHouse,
   getMyPollsByHouse,
   getPollById,
+  getPollResults,
   getPollsByHouse,
 } from "../controllers/pollsController.js";
 
 const router = express.Router();
 
 // Polls
-router.get("/:id", getPollById);
+router.get("/:poll_id", getPollById);
 router.get("/house/:house_id", getPollsByHouse);
 router.get("/user/:house_id/:user_id", getMyPollsByHouse);
 router.get("/user_pending/:house_id/:user_id", getMyPendingPollsByHouse);
 router.get("/user_historic/:house_id/:user_id", getMyHistoricPollsByHouse);
+router.get("/results/:poll_id", getPollResults);
 router.post("/", createPoll);
 router.post("/addVote/:poll_option_id", addVote);
-router.delete("/:id", deletePollById);
+router.delete("/:poll_id", deletePollById);
 
 // Comments
 router.post("/comments", addNewComment);

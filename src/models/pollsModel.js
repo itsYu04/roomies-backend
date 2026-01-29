@@ -28,6 +28,36 @@ export async function insertPoll(
   return data;
 }
 
+function normalizePollOptions(polls) {
+  return (polls || []).map((p) => ({
+    ...p,
+    options: p.poll_options ?? [],
+  }));
+}
+
+async function addCreatorUsernames(polls) {
+  const creatorIds = [...new Set(polls.map((p) => p.created_by))].filter(
+    Boolean,
+  );
+  if (creatorIds.length === 0) return polls;
+
+  const { data: creators, error: error } = await supabase
+    .from("user_profile")
+    .select("id, username")
+    .in("id", creatorIds);
+
+  if (error) throw new Error(creatorsError.message);
+
+  const creatorsById = Object.fromEntries(
+    (creators || []).map((c) => [c.id, c.username]),
+  );
+
+  return polls.map((p) => ({
+    ...p,
+    created_by_username: creatorsById[p.created_by] ?? null,
+  }));
+}
+
 export async function fetchPollsByHouse(house_id) {
   const today = new Date().toISOString().split("T")[0];
   const { data, error } = await supabase
@@ -51,32 +81,8 @@ export async function fetchMyPollsByHouse(house_id, user_id) {
     .gt("expires_at", today);
   if (error) throw new Error(error.message);
 
-  const normalized = (data || []).map((p) => ({
-    ...p,
-    options: p.poll_options ?? [],
-  }));
-
-  const creatorIds = [...new Set(normalized.map((p) => p.created_by))].filter(
-    Boolean,
-  );
-  if (creatorIds.length === 0) return normalized;
-
-  const { data: creators, error: creatorsError } = await supabase
-    .from("user_profile")
-    .select("id, username")
-    .in("id", creatorIds);
-
-  if (creatorsError) throw new Error(creatorsError.message);
-
-  const creatorsById = Object.fromEntries(
-    (creators || []).map((c) => [c.id, c.username]),
-  );
-
-  const withUsernames = normalized.map((p) => ({
-    ...p,
-    created_by_username: creatorsById[p.created_by] ?? null,
-  }));
-
+  const normalized = normalizePollOptions(data);
+  const withUsernames = addCreatorUsernames(normalized);
   return withUsernames;
 }
 
@@ -103,32 +109,23 @@ export async function fetchMyPendingPollsByHouse(house_id, user_id) {
     .gt("expires_at", today);
   if (error) throw new Error(error.message);
 
-  const normalized = (data || []).map((p) => ({
-    ...p,
-    options: p.poll_options ?? [],
-  }));
+  const normalized = normalizePollOptions(data);
 
-  const creatorIds = [...new Set(normalized.map((p) => p.created_by))].filter(
-    Boolean,
-  );
-  if (creatorIds.length === 0) return normalized;
+  const pollIds = normalized.map((p) => p.id);
+  if (pollIds.length === 0) return [];
 
-  const { data: creators, error: creatorsError } = await supabase
-    .from("user_profile")
-    .select("id, username")
-    .in("id", creatorIds);
+  const { data: votes, error: votesError } = await supabase
+    .from("poll_votes")
+    .select("poll_id")
+    .eq("voter_id", user_id)
+    .in("poll_id", pollIds);
 
-  if (creatorsError) throw new Error(creatorsError.message);
+  if (votesError) throw new Error(votesError.message);
 
-  const creatorsById = Object.fromEntries(
-    (creators || []).map((c) => [c.id, c.username]),
-  );
+  const votedPollIds = new Set((votes || []).map((v) => v.poll_id));
+  const notVoted = normalized.filter((p) => !votedPollIds.has(p.id));
 
-  const withUsernames = normalized.map((p) => ({
-    ...p,
-    created_by_username: creatorsById[p.created_by] ?? null,
-  }));
-
+  const withUsernames = addCreatorUsernames(notVoted);
   return withUsernames;
 }
 
@@ -148,6 +145,15 @@ export async function insertPollOption(poll_id, option_text) {
     .select();
   console.log("Poll id is: ", poll_id);
   console.log("Inserting new poll option", option_text);
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function fetchPollResults(poll_id) {
+  const { data, error } = await supabase
+    .from("poll_options")
+    .select("id, option_text, num_votes")
+    .eq("poll_id", poll_id);
   if (error) throw new Error(error.message);
   return data;
 }

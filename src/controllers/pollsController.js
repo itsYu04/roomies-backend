@@ -6,6 +6,7 @@ import {
   fetchMyPendingPollsByHouse,
   fetchMyPollsByHouse,
   fetchPollById,
+  fetchPollResults,
   fetchPollsByHouse,
   insertComment,
   insertPoll,
@@ -33,17 +34,17 @@ export async function createPoll(req, res) {
       created_by,
       expires_at,
       is_closed,
-      type
+      type,
     );
     // Add the poll options
-    console.log("The inserted poll is:",poll);
+    console.log("The inserted poll is:", poll);
     const createdPoll = Array.isArray(poll) ? poll[0] : poll;
     console.log("Options are: ", options);
 
     let insertedOptions = [];
     if (Array.isArray(options) && options.length > 0) {
       const inserted = await Promise.all(
-        options.map((opt) => insertPollOption(createdPoll.id, opt))
+        options.map((opt) => insertPollOption(createdPoll.id, opt)),
       );
       insertedOptions = inserted.flatMap((r) => r || []);
     }
@@ -81,7 +82,7 @@ export async function getMyHistoricPollsByHouse(req, res) {
     const user_id = req.params.user_id;
     const my_historic_polls = await fetchMyHistoricPollsByHouse(
       house_id,
-      user_id
+      user_id,
     );
     res.status(200).json(my_historic_polls);
   } catch (e) {
@@ -95,7 +96,7 @@ export async function getMyPendingPollsByHouse(req, res) {
     const user_id = req.params.user_id;
     const my_pending_polls = await fetchMyPendingPollsByHouse(
       house_id,
-      user_id
+      user_id,
     );
     res.status(200).json(my_pending_polls);
   } catch (e) {
@@ -105,7 +106,7 @@ export async function getMyPendingPollsByHouse(req, res) {
 
 export async function getPollById(req, res) {
   try {
-    const poll_id = req.params.id;
+    const poll_id = req.params.poll_id;
     const poll = await fetchPollById(poll_id);
     res.status(200).json(poll);
   } catch (e) {
@@ -113,9 +114,19 @@ export async function getPollById(req, res) {
   }
 }
 
+export async function getPollResults(req, res) {
+  try {
+    const poll_id = req.params.poll_id;
+    const poll_results = await fetchPollResults(poll_id);
+    res.status(200).json(poll_results);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
 export async function deletePollById(req, res) {
   try {
-    const poll_id = req.params.id;
+    const poll_id = req.params.poll_id;
     await deletePoll(poll_id);
     await res
       .status(200)
@@ -130,11 +141,9 @@ export async function addVote(req, res) {
     const poll_option_id = req.params.poll_option_id;
     const { voter_id, poll_id } = req.body;
     await insertVote(poll_option_id, voter_id, poll_id);
-    await res
-      .status(200)
-      .json({
-        message: `Vote to poll with id: ${poll_id} submitted successfully.`,
-      });
+    await res.status(200).json({
+      message: `Vote to poll with id: ${poll_id} submitted successfully.`,
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

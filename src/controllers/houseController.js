@@ -55,8 +55,14 @@ export async function getHouseMembers(req, res) {
 
 export async function createHouse(req, res) {
   try {
-    const { name, address, user_id } = req.body;
-    const house = await insertHouse(name, address, user_id);
+    const { name, address, user_id, def_currency, def_rotation } = req.body;
+    const house = await insertHouse(
+      name,
+      address,
+      user_id,
+      def_currency,
+      def_rotation,
+    );
     const house_id = house.id;
     const role = "owner";
     await insertHouseUserRelation(user_id, house_id, role);

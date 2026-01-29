@@ -37,10 +37,16 @@ export async function fetchHouseById(house_id) {
   return data;
 }
 
-export async function insertHouse(name, address, user_id) {
+export async function insertHouse(
+  name,
+  address,
+  user_id,
+  def_currency,
+  def_rotation,
+) {
   const { data, error } = await supabase
     .from("house")
-    .insert([{ name, address, user_id }])
+    .insert([{ name, address, user_id, def_currency, def_rotation }])
     .select();
   if (error) throw new Error(error.message);
   return data[0];
@@ -49,7 +55,7 @@ export async function insertHouse(name, address, user_id) {
 export async function insertHouseUserRelation(
   user_id,
   house_id,
-  role = "member"
+  role = "member",
 ) {
   const { data, error } = await supabase
     .from("user_house")

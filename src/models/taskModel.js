@@ -12,7 +12,7 @@ export async function fetchHouseTasks(house_id) {
   const tasks = data || [];
 
   const assignedId = [...new Set(tasks.map((p) => p.assigned_to))].filter(
-    Boolean
+    Boolean,
   );
   if (assignedId.length === 0) return tasks;
 
@@ -24,7 +24,7 @@ export async function fetchHouseTasks(house_id) {
   if (usersError) throw new Error(usersError.message);
 
   const assignedById = Object.fromEntries(
-    (users || []).map((c) => [c.id, c.username])
+    (users || []).map((c) => [c.id, c.username]),
   );
 
   const withUsernames = tasks.map((p) => ({
@@ -35,14 +35,38 @@ export async function fetchHouseTasks(house_id) {
   return withUsernames;
 }
 
-export async function fetchHouseTasksByUser(house_id, user_id) {
+export async function fetchCompletedHouseTasksByUser(house_id, user_id) {
   const { data, error } = await supabase
     .from("tasks")
     .select("*")
+    .eq("is_done", true)
     .eq("house_id", house_id)
-    .eq("user_id", user_id);
+    .eq("assigned_to", user_id);
   if (error) throw new Error(error.message);
-  return data;
+  const tasks = data || [];
+
+  const assignedId = [...new Set(tasks.map((p) => p.assigned_to))].filter(
+    Boolean,
+  );
+  if (assignedId.length === 0) return tasks;
+
+  const { data: users, error: usersError } = await supabase
+    .from("user_profile")
+    .select("id, username")
+    .in("id", assignedId);
+
+  if (usersError) throw new Error(usersError.message);
+
+  const assignedById = Object.fromEntries(
+    (users || []).map((c) => [c.id, c.username]),
+  );
+
+  const withUsernames = tasks.map((p) => ({
+    ...p,
+    assigned_to_username: assignedById[p.assigned_to] ?? null,
+  }));
+
+  return withUsernames;
 }
 
 export async function fetchHouseTaskById(task_id) {
@@ -63,7 +87,7 @@ export async function insertHouseTask(
   due_date,
   rotation,
   task_type,
-  is_done
+  is_done,
 ) {
   const { data, error } = await supabase
     .from("tasks")
@@ -93,7 +117,7 @@ export async function updateTask(
   assigned_to,
   due_date,
   rotation,
-  is_done
+  is_done,
 ) {
   const updatePayload = Object.fromEntries(
     Object.entries({
@@ -104,7 +128,7 @@ export async function updateTask(
       due_date,
       rotation,
       is_done,
-    }).filter(([, v]) => v !== undefined)
+    }).filter(([, v]) => v !== undefined),
   );
   if (Object.keys(updatePayload).length === 0) {
     throw new Error("No fields provided to update");
@@ -170,7 +194,7 @@ export async function setTaskAsComplete(task_id, task_image_url) {
       nextDueDate.toISOString().split("T")[0],
       task.rotation,
       task.task_type,
-      false
+      false,
     );
     return { message: "Task completed and next task created", newTask };
   }

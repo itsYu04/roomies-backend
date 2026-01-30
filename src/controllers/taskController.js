@@ -2,7 +2,7 @@ import {
   deleteTask,
   fetchHouseTaskById,
   fetchHouseTasks,
-  fetchHouseTasksByUser,
+  fetchCompletedHouseTasksByUser,
   insertHouseTask,
   setTaskAsComplete,
   updateTask,
@@ -18,11 +18,11 @@ export async function getTasksByHouse(req, res) {
   }
 }
 
-export async function getTasksByUser(req, res) {
+export async function getCompletedHouseTasksByUser(req, res) {
   try {
     const house_id = req.params.house_id;
     const user_id = req.params.user_id;
-    const tasks = await fetchHouseTasksByUser(house_id, user_id);
+    const tasks = await fetchCompletedHouseTasksByUser(house_id, user_id);
     res.status(200).json(tasks);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -59,7 +59,7 @@ export async function createNewTask(req, res) {
       due_date,
       rotation,
       task_type,
-      is_done
+      is_done,
     );
     if (task) {
       console.log(task.id);
@@ -75,8 +75,15 @@ export async function createNewTask(req, res) {
 export async function updateTaskData(req, res) {
   try {
     const task_id = req.params.task_id;
-    const { house_id, title, description, assigned_to, due_date, rotation, is_done } =
-      req.body;
+    const {
+      house_id,
+      title,
+      description,
+      assigned_to,
+      due_date,
+      rotation,
+      is_done,
+    } = req.body;
     console.log(`Updating task with id: ${task_id}`);
     const updatedTask = await updateTask(
       task_id,
@@ -86,7 +93,7 @@ export async function updateTaskData(req, res) {
       assigned_to,
       due_date,
       rotation,
-      is_done
+      is_done,
     );
     res.status(200).json(updatedTask);
   } catch (e) {

@@ -1,4 +1,5 @@
 import {
+  closePoll,
   deleteComment,
   deletePoll,
   fetchCommentsByPoll,
@@ -12,6 +13,7 @@ import {
   insertPoll,
   insertPollOption,
   insertVote,
+  updatePollDescription,
 } from "../models/pollsModel.js";
 
 //Polls
@@ -128,7 +130,7 @@ export async function deletePollById(req, res) {
   try {
     const poll_id = req.params.poll_id;
     await deletePoll(poll_id);
-    await res
+    res
       .status(200)
       .json({ message: `Poll with ID ${poll_id} deleted successfully.` });
   } catch (e) {
@@ -136,12 +138,35 @@ export async function deletePollById(req, res) {
   }
 }
 
+export async function updatePollData(req, res) {
+  try {
+    const poll_id = req.params.poll_id;
+    const { description } = req.body;
+    await updatePollDescription(poll_id, description);
+    res
+      .status(200)
+      .json({ message: `Poll with ID ${poll_id} updated successfully.` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function manualClosePollById(req, res) {
+  try {
+    const poll_id = req.params.poll_id;
+    await closePoll(poll_id);
+    res
+      .status(200)
+      .json({ message: `Poll with ID ${poll_id} closed successfully.` });
+  } catch (e) {}
+}
+
 export async function addVote(req, res) {
   try {
     const poll_option_id = req.params.poll_option_id;
     const { voter_id, poll_id } = req.body;
     await insertVote(poll_option_id, voter_id, poll_id);
-    await res.status(200).json({
+    res.status(200).json({
       message: `Vote to poll with id: ${poll_id} submitted successfully.`,
     });
   } catch (e) {
@@ -165,7 +190,7 @@ export async function getCommentsByPoll(req, res) {
     const poll_id = req.params.poll_id;
     const comments = await fetchCommentsByPoll(poll_id);
     console.log("Comments are:", comments);
-    await res.status(200).json(comments);
+    res.status(200).json(comments);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -175,7 +200,7 @@ export async function deleteCommentById(req, res) {
   try {
     const comment_id = req.params.comment_id;
     await deleteComment(comment_id);
-    await res
+    res
       .status(200)
       .json({ message: `Comment with ID ${comment_id} deleted successfully.` });
   } catch (e) {

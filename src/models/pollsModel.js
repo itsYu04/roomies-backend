@@ -132,10 +132,12 @@ export async function fetchMyPendingPollsByHouse(house_id, user_id) {
 export async function fetchPollById(poll_id) {
   const { data, error } = await supabase
     .from("polls")
-    .select()
+    .select("*, poll_options(*)")
     .eq("id", poll_id);
   if (error) throw new Error(error.message);
-  return data;
+  const normalized = normalizePollOptions(data);
+  const withUsernames = addCreatorUsernames(normalized);
+  return withUsernames;
 }
 
 export async function insertPollOption(poll_id, option_text) {
@@ -160,6 +162,26 @@ export async function fetchPollResults(poll_id) {
 
 export async function deletePoll(poll_id) {
   const { error } = await supabase.from("polls").delete().eq("id", poll_id);
+  if (error) throw new Error(error.message);
+}
+
+export async function updatePollDescription(poll_id, description) {
+  const updatePayload = {};
+  updatePayload.description = description;
+  const { error } = await supabase
+    .from("polls")
+    .update(updatePayload)
+    .eq("id", poll_id);
+  if (error) throw new Error(error.message);
+}
+
+export async function closePoll(poll_id) {
+  const updatePayload = {};
+  updatePayload.is_closed = true;
+  const { error } = await supabase
+    .from("polls")
+    .update(updatePayload)
+    .eq("id", poll_id);
   if (error) throw new Error(error.message);
 }
 

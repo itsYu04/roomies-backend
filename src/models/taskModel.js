@@ -1,12 +1,12 @@
 import supabase from "../config/supabase.js";
 import { fetchHouseMembers } from "../models/houseModel.js";
 
-export async function fetchHouseTasks(house_id) {
+export async function fetchHouseTasks(house_id, is_done) {
   const { data, error } = await supabase
     .from("tasks")
     .select()
     .eq("house_id", house_id)
-    .eq("is_done", false); // Just show the tasks that aren't done
+    .eq("is_done", is_done);
   if (error) throw new Error(error.message);
 
   const tasks = data || [];
@@ -35,39 +35,6 @@ export async function fetchHouseTasks(house_id) {
   return withUsernames;
 }
 
-export async function fetchCompletedHouseTasksByUser(house_id, user_id) {
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("*")
-    .eq("is_done", true)
-    .eq("house_id", house_id)
-    .eq("assigned_to", user_id);
-  if (error) throw new Error(error.message);
-  const tasks = data || [];
-
-  const assignedId = [...new Set(tasks.map((p) => p.assigned_to))].filter(
-    Boolean,
-  );
-  if (assignedId.length === 0) return tasks;
-
-  const { data: users, error: usersError } = await supabase
-    .from("user_profile")
-    .select("id, username")
-    .in("id", assignedId);
-
-  if (usersError) throw new Error(usersError.message);
-
-  const assignedById = Object.fromEntries(
-    (users || []).map((c) => [c.id, c.username]),
-  );
-
-  const withUsernames = tasks.map((p) => ({
-    ...p,
-    assigned_to_username: assignedById[p.assigned_to] ?? null,
-  }));
-
-  return withUsernames;
-}
 
 export async function fetchHouseTaskById(task_id) {
   const { data, error } = await supabase

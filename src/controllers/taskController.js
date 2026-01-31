@@ -2,7 +2,6 @@ import {
   deleteTask,
   fetchHouseTaskById,
   fetchHouseTasks,
-  fetchCompletedHouseTasksByUser,
   insertHouseTask,
   setTaskAsComplete,
   updateTask,
@@ -11,18 +10,8 @@ import {
 export async function getTasksByHouse(req, res) {
   try {
     const house_id = req.params.house_id;
-    const tasks = await fetchHouseTasks(house_id);
-    res.status(200).json(tasks);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-}
-
-export async function getCompletedHouseTasksByUser(req, res) {
-  try {
-    const house_id = req.params.house_id;
-    const user_id = req.params.user_id;
-    const tasks = await fetchCompletedHouseTasksByUser(house_id, user_id);
+    const is_done = req.params.is_done;
+    const tasks = await fetchHouseTasks(house_id, is_done);
     res.status(200).json(tasks);
   } catch (e) {
     res.status(500).json({ error: e.message });

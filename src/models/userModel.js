@@ -6,7 +6,7 @@ export async function fetchAllUsers() {
   return data;
 }
 
-export async function insertUser(id, username, avatar_url) {
+export async function insertUser(id, username, email, avatar_url) {
   const { data, error } = await supabase
     .from("user_profile")
     .insert([{ id, username, email, avatar_url }])

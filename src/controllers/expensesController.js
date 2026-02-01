@@ -1,0 +1,67 @@
+import {
+  fetchHouseExpenses,
+  fetchHouseTotalBalance,
+  fetchUserTotalBalanceByHouse,
+  insertExpense,
+  insertExpenseSplit,
+} from "../models/expensesModel.js";
+
+export async function getHouseExpenses(req, res) {
+  try {
+    const house_id = req.params.house_id;
+    const expenses = await fetchHouseExpenses(house_id);
+    res.status(200).json(expenses);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function getHouseTotalBalance(req, res) {
+  try {
+    const house_id = req.params.house_id;
+    const user_id = req.params.user_id;
+    console.log("house_id:", house_id, "user_id:", user_id);
+    const houseBalance = await fetchHouseTotalBalance(house_id);
+    const userBalance = await fetchUserTotalBalanceByHouse(house_id, user_id);
+    res.status(200).json({ houseBalance, userBalance });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function createExpense(req, res) {
+  try {
+    const {
+      house_id,
+      title,
+      total_amount,
+      paid_by,
+      split_type,
+      expense_type,
+      splits,
+    } = req.body;
+    const expense = await insertExpense(
+      house_id,
+      title,
+      total_amount,
+      paid_by,
+      split_type,
+      expense_type,
+    );
+    // Also insert each individual expense_splits
+    const expense_id = expense.id;
+    for (const split of splits) {
+      await insertExpenseSplit(
+        expense_id,
+        split.user_id,
+        split.amount,
+        split.is_paid,
+      );
+    }
+    console.log(`Expense with id: ${expense_id} created successfully`);
+    res.status(200).json(expense);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+    console.log(`Error creating expense`);
+  }
+}

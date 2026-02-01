@@ -11,7 +11,7 @@ import {
 export async function getAllUsers(req, res) {
   try {
     const users = await fetchAllUsers();
-    res.json(users);
+    res.status(200).json(users);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

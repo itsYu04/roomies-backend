@@ -15,7 +15,7 @@ export async function getHouseById(req, res) {
   try {
     const house_id = req.params.id;
     const house = await fetchHouseById(house_id);
-    res.json(house);
+    res.status(200).json(house);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -37,7 +37,7 @@ export async function getHousesByUserId(req, res) {
         ...house,
       };
     });
-    res.json(combinedData);
+    res.status(200).json(combinedData);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

@@ -49,6 +49,29 @@ export async function fetchHouseExpenses(house_id) {
   return withUsernames;
 }
 
+export async function fetchExpense(expense_id) {
+  const { data, error } = await supabase
+    .from("expenses")
+    .select("*, expense_splits(*)")
+    .eq("id", expense_id);
+  if (error) throw new Error(error.message);
+
+  if (!data || data.length === 0) return data;
+
+  const withUsernames = await Promise.all(
+    data.map(async (expense) => {
+      if (expense.expense_splits && expense.expense_splits.length > 0) {
+        expense.expense_splits = await addSplitUsernames(
+          expense.expense_splits,
+        );
+      }
+      return expense;
+    }),
+  );
+
+  return withUsernames;
+}
+
 export async function fetchHouseTotalBalance(house_id) {
   // get_house_total_balance is a function defined in the database
   const { data, error } = await supabase.rpc("get_house_total_balance", {

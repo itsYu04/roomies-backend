@@ -1,5 +1,6 @@
 import {
   deleteExpense,
+  fetchExpense,
   fetchExpenseSplits,
   fetchHouseExpenses,
   fetchHouseTotalBalance,
@@ -15,6 +16,16 @@ export async function getHouseExpenses(req, res) {
     const house_id = req.params.house_id;
     const expenses = await fetchHouseExpenses(house_id);
     res.status(200).json(expenses);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function getExpenseById(req, res) {
+  try {
+    const expense_id = req.params.expense_id;
+    const expense = await fetchExpense(expense_id);
+    res.status(200).json(expense);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

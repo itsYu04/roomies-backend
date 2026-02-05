@@ -1,10 +1,13 @@
 import {
+  deleteExpense,
   fetchExpenseSplits,
   fetchHouseExpenses,
   fetchHouseTotalBalance,
   fetchUserTotalBalanceByHouse,
   insertExpense,
   insertExpenseSplit,
+  settleExpense,
+  settleExpenseSplit,
 } from "../models/expensesModel.js";
 
 export async function getHouseExpenses(req, res) {
@@ -68,11 +71,41 @@ export async function createExpense(req, res) {
 }
 
 export async function getExpenseSplits(req, res) {
-  try{
+  try {
     const expense_id = req.params.expense_id;
     const expense_splits = await fetchExpenseSplits(expense_id);
     res.status(200).json(expense_splits);
-  }catch(e){
-    res.status(500).json({error: e.message});
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function deleteExpenseById(req, res) {
+  try {
+    const expense_id = req.params.expense_id;
+    await deleteExpense(expense_id);
+    res.status(200).json(`Expense with id: ${expense_id} deleted successfully`);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function settleExpenseById(req, res) {
+  try {
+    const expense_id = req.params.expense_id;
+    const expense = await settleExpense(expense_id);
+    res.status(200).json(expense);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function settleExpenseSplitById(req, res) {
+  try {
+    const split_id = req.params.split_id;
+    const split = await settleExpenseSplit(split_id);
+    res.status(200).json(split);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 }

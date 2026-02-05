@@ -1,4 +1,5 @@
 import {
+  fetchExpenseSplits,
   fetchHouseExpenses,
   fetchHouseTotalBalance,
   fetchUserTotalBalanceByHouse,
@@ -63,5 +64,15 @@ export async function createExpense(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
     console.log(`Error creating expense`);
+  }
+}
+
+export async function getExpenseSplits(req, res) {
+  try{
+    const expense_id = req.params.expense_id;
+    const expense_splits = await fetchExpenseSplits(expense_id);
+    res.status(200).json(expense_splits);
+  }catch(e){
+    res.status(500).json({error: e.message});
   }
 }

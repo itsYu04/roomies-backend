@@ -56,3 +56,12 @@ export async function insertExpenseSplit(expense_id, user_id, amount, is_paid) {
   if (error) throw new Error(error.message);
   return data;
 }
+
+export async function fetchExpenseSplits(expense_id) {
+  const { data, error } = await supabase
+    .from("expense_splits")
+    .select()
+    .eq("expense_id", expense_id);
+  if (error) throw new Error(error.message);
+  return data;
+}

@@ -2,6 +2,7 @@ import {
   deleteTask,
   fetchHouseTaskById,
   fetchHouseTasks,
+  getTaskRankingByPeriod,
   insertHouseTask,
   setTaskAsComplete,
   updateTask,
@@ -105,9 +106,19 @@ export async function markTaskAsDone(req, res) {
 export async function deleteTaskById(req, res) {
   try {
     const task_id = req.params.task_id;
-    console.log(`Deleting task with id: ${task_id}`);
     await deleteTask(task_id);
     res.status(200).json(`Task with id: ${task_id} deleted successfully`);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
+export async function getRankingByPeriod(req, res) {
+  try {
+    const house_id = req.params.house_id;
+    const period = req.params.period;
+    const ranking = await getTaskRankingByPeriod(house_id, period);
+    res.status(200).json(ranking);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

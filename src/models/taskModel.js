@@ -35,7 +35,6 @@ export async function fetchHouseTasks(house_id, is_done) {
   return withUsernames;
 }
 
-
 export async function fetchHouseTaskById(task_id) {
   const { data, error } = await supabase
     .from("tasks")
@@ -119,6 +118,7 @@ export async function setTaskAsComplete(task_id, task_image_url) {
 
   const updatePayload = {};
   updatePayload.is_done = true;
+  updatePayload.done_at = new Date().toISOString();
   if (task_image_url !== undefined)
     updatePayload.task_image_url = task_image_url;
   // Mark task as done
@@ -171,4 +171,15 @@ export async function setTaskAsComplete(task_id, task_image_url) {
 export async function deleteTask(task_id) {
   const { error } = await supabase.from("tasks").delete().eq("id", task_id);
   if (error) throw new Error(error.message);
+}
+
+export async function getTaskRankingByPeriod(house_id, period = "day") {
+  if (!["day", "week", "month"].includes(period))
+    throw new Error("Invalid period");
+  const { data, error } = await supabase.rpc("get_task_ranking_by_period", {
+    house_id_param: house_id,
+    period_param: period,
+  });
+  if (error) throw new Error(error.message);
+  return data;
 }
